@@ -1,0 +1,122 @@
+#+TITLE: 
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+OPTIONS: author:nil date:nil toc:nil tex:dvipng num:nil
+#+LATEX_CLASS: revtex4-1
+#+LATEX_CLASS_OPTIONS:[aps,citeautoscript,preprint,citeautoscript,showkeys,floatfix,superscriptaddress,longbibliography]
+#+latex_header: \usepackage[utf8]{inputenc}
+#+latex_header: \usepackage{url}
+#+latex_header: \usepackage[version=4]{mhchem}
+#+latex_header: \usepackage{chemmacros}[2016/05/02]
+#+latex_header: \usepackage{graphicx}
+#+latex_header: \usepackage{float}
+#+latex_header: \usepackage{color}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \usepackage{textcomp}
+#+latex_header: \usepackage{wasysym}
+#+latex_header: \usepackage{latexsym}
+#+latex_header: \usepackage{amssymb}
+#+latex_header: \usepackage{minted}
+#+latex_header: \usepackage[linktocpage, pdfstartview=FitH, colorlinks, linkcolor=black, anchorcolor=black, citecolor=black, filecolor=black, menucolor=black, urlcolor=black]{hyperref}
+#+latex_header: \newcommand{\red}[1]{\textcolor{red}{#1}}
+#+latex_header: \chemsetup{formula = mhchem ,modules = {reactions,thermodynamics}}
+#+latex_header: \usepackage[noabbrev]{cleveref}
+#+latex_header: \def\bibsection{\section*{Supplementary References}} 
+#+latex_header: \renewcommand{\figurename}{Supplementary Figure}
+#+latex_header:\renewcommand{\thetable}{\arabic{table}}
+#+latex_header: \renewcommand{\tablename}{Supplementary Table}
+#+latex_header: \Crefname{figure}{Supplementary Figure}{Supplementary Figures}
+#+latex_header: \Crefname{figure}{Supplementary Figure}{Supplementary Figures}
+#+latex_header: \Crefname{table}{Supplementary Table}{Supplementary Tables}
+
+\title{Supplementary Data: Plasma-Catalytic Ammonia Synthesis Beyond the Equilibrium Limit}
+
+\author{Prateek Mehta}
+\affiliation{Department of Chemical and Biomolecular Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+
+\author{Patrick Barboun}
+\affiliation{Department of Chemical and Biomolecular Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+
+\author{Yannick Engelmann}
+\affiliation{Department of Chemistry, Antwerp University, Campus Drie Eiken, Universiteitsplein 1, 2610 Wilrijk}
+
+\author{David B. Go}
+\affiliation{Department of Chemical and Biomolecular Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+\affiliation{Department of Aerospace and Mechanical Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+
+\author{Annemie Bogaerts}
+\email{annemie.bogaerts@uantwerpen.be}
+\affiliation{Department of Chemistry, Antwerp University, Campus Drie Eiken, Universiteitsplein 1, 2610 Wilrijk}
+
+\author{William F. Schneider}
+\email{wschneider@nd.edu}
+\affiliation{Department of Chemical and Biomolecular Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+
+\author{Jason C. Hicks}
+\email{jhicks3@nd.edu}
+\affiliation{Department of Chemical and Biomolecular Engineering, University of Notre Dame, Notre Dame, Indiana 46556, United States}
+
+\date{\today}
+\pacs{}
+\pagenumbering{gobble} 
+\maketitle
+\raggedbottom
+
+* Supplementary Data
+
+Source code and raw data is provided in an external Zenodo repository at *link.* The python class =simpleMkm= in /simplemkm.py/ contains the core functions necessary to perform the microkinetic calculations, while the class =mkmRunner= in mkmutils.py contains utility functions to run the calculations in an automated fashion on our computing cluster. The input (/*.mkminp/) and output (/*.mkmout/) files for the microkinetic model are included in the Zenodo directory. Raw experimental data is also provided as an Excel spreadsheet (*filename*). Example python scripts to perform the calculations in this work, and to create the figures in the main text are provided below. These scripts were executed within an Emacs org-mode document (/supporting-data.org/), which was then exported to create this supplementary data pdf file. 
+
+
+** Using the kinetic model: Plasma-off calculations
+
+#+BEGIN_SRC python :results output org drawer
+from utils import cd
+from mkmutils import mkmRunner as runner
+
+EAs = [-1.2, -0.6, 0.0]
+
+plasma_on = False
+rxn2_barrier = True
+
+for EA in EAs:
+    mod = runner(EA,
+                 plasma_on=plasma_on,
+                 rxn2_barrier=rxn2_barrier,
+                 npts=100,
+                 concentration_based=True)
+    
+    with cd('mkm-calcs/{0}'.format(mod.prefix)):
+	mod.write_input()
+	mod.run_job()
+#+END_SRC
+
+
+** Using the kinetic model: Plasma-on calculations
+
+ #+BEGIN_SRC python :results output org drawer
+from utils import cd
+from mkmutils import mkmRunner as runner
+
+EAs = [-1.2, -0.6, 0.0]
+
+kei = range(-15, -5, 1)
+ks_eimpact=[float('1.0e{0}'.format(i)) for i in kei]  # cm3 / s
+
+for EA in EAs:
+    for k_eimpact in ks_eimpact:
+	mod = runner(EA,
+                     plasma_on=True,
+                     k_eimpact_A2=k_eimpact,
+		     npts=200,
+                     rxn2_barrier=True,
+                     excite_type='vib',
+                     Evib_A2=Evib_A2)
+
+	with cd('mkm-calcs/{0}'.format(mod.prefix)):
+	        mod.write_input(ncores=2)
+	        mod.run_job()
+ #+END_SRC
+
+
+** Figure 2
+
+** Figure 3
