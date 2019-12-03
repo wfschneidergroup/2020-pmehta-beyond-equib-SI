@@ -20,9 +20,8 @@
 #+latex_header: \newcommand{\red}[1]{\textcolor{red}{#1}}
 #+latex_header: \chemsetup{formula = mhchem ,modules = {reactions,thermodynamics}}
 #+latex_header: \usepackage[noabbrev]{cleveref}
-#+latex_header: \def\bibsection{\section*{Supplementary References}} 
+#+latex_header: \def\bibsection{\section*{\refname}} 
 #+latex_header: \renewcommand{\figurename}{Supplementary Figure}
-#+latex_header:\renewcommand{\thetable}{\arabic{table}}
 #+latex_header: \renewcommand{\tablename}{Supplementary Table}
 #+latex_header: \Crefname{figure}{Supplementary Figure}{Supplementary Figures}
 #+latex_header: \Crefname{figure}{Supplementary Figure}{Supplementary Figures}
@@ -63,8 +62,7 @@
 
 * Supplementary Data
 
-Source code and raw data is provided in an external Zenodo repository at *link.* The python class =simpleMkm= in /simplemkm.py/ contains the core functions necessary to perform the microkinetic calculations, while the class =mkmRunner= in mkmutils.py contains utility functions to run the calculations in an automated fashion on our computing cluster. The input (/*.mkminp/) and output (/*.mkmout/) files for the microkinetic model are included in the Zenodo directory. Raw experimental data is also provided as an Excel spreadsheet (*filename*). Example python scripts to perform the calculations in this work, and to create the figures in the main text are provided below. These scripts were executed within an Emacs org-mode document (/supporting-data.org/), which was then exported to create this supplementary data pdf file. 
-
+Source code and raw data is provided in an external Zenodo repository at *link.* The python class =simpleMkm= in /simplemkm.py/ contains the core functions necessary to perform the microkinetic calculations, while the class =mkmRunner= in mkmutils.py contains utility functions to run the calculations in an automated fashion on our computing cluster. The input (/*.mkminp/) and output (/*.mkmout/) files for the microkinetic model are included in the Zenodo directory. Raw experimental data is also provided as an Excel spreadsheet (/high-T-expts.xlsx/). Example python scripts to perform the calculations in this work, and to create the figures in the main text are provided below. These scripts were executed within an Emacs org-mode document (/supporting-data.org/), which was then exported to create this supplementary data pdf file. 
 
 ** Using the kinetic model: Plasma-off calculations
 
@@ -128,7 +126,7 @@ for EA in EAs:
  :end:
 
 
-** Figure 2: Plasma-off \ce{NH3} yields
+** Figure 2: Modeled plasma-off \ce{NH3} yields
 
  #+BEGIN_SRC python :results output org drawer
 from simplemkm import simpleMkm as mkm
@@ -264,7 +262,7 @@ plt.show()
  :end:
 
 
-** Figure 3: Plasma-on \ce{NH3} yields
+** Figure 3: Modeled plasma-on \ce{NH3} yields
 
 #+BEGIN_SRC python
 from mkmutils import *
@@ -383,3 +381,222 @@ plt.show()
 #+RESULTS:
 
 
+
+** Figure 4: Experimental plasma-only \ce{NH3} yields
+
+#+BEGIN_SRC python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+plt.style.use('seaborn-paper')
+plt.rcParams["font.family"] = "Helvetica"
+
+plt.figure(figsize = (3.25, 3), dpi=200)
+
+data = pd.read_excel('high-T-expts.xlsx',
+                     'eqb-data',
+                     header=0)
+
+plt.plot(data['T(K)'], data['X'] * 100, 'k--', label='Eqb. limit')
+
+data = pd.read_excel('high-T-expts.xlsx', 'plasma-sweep', header=1)
+
+plt.errorbar(data['Temperature.1'] + 273.15,
+             data['Conversion.1'],
+             data['Conversion Error.1'],
+             capthick=1.5,
+             fmt=None,
+             label=None)
+
+plt.plot(data['Temperature.1'] + 273.15,
+         data['Conversion.1'],
+         'o',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C0',
+         label='10 W')
+
+plt.errorbar(data['Temperature'] + 273.15,
+             data['Conversion'],
+             data['Conversion Error'],
+             c='tan',
+             fmt=None,
+             capthick=1.5,
+             label=None)
+
+plt.plot(data['Temperature'] + 273.15,
+         data['Conversion'],
+         'o',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='tan',
+         label='5 W')
+
+plt.errorbar(data['Temperature.2'] + 273.15,
+             data['Conversion.2'],
+             data['Conversion Error.2'],
+             c='C3', capthick=1.5,
+             fmt=None,
+             label=None)
+plt.plot(data['Temperature.2'] + 273.15,
+         data['Conversion.2'], 'o',
+         ms=6, mew=1.5,
+         mfc='w',
+         c='C3',
+         label='15 W')
+
+plt.ylim(0, 4)
+plt.xlim(400, 1173)
+plt.xlabel('Temperature (K)')
+plt.ylabel('NH$_{3}$ Yield (%)')
+plt.legend(frameon=False, fontsize=8, ncol=2)
+plt.tight_layout()
+
+
+for ext in ['eps', 'pdf', 'png']:
+    plt.savefig('figures/NH3-power-expts.{0}'.format(ext), dpi=200)
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+
+
+** Figure 5: Experimental plasma-catalytic \ce{NH3} yields
+
+
+#+BEGIN_SRC python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+plt.style.use('seaborn-paper')
+plt.rcParams["font.family"] = "Helvetica"
+
+plt.figure(figsize = (4, 5), dpi=200)
+
+
+ax2 = plt.subplot(212)
+
+data = pd.read_excel('high-T-expts.xlsx', 'NH3-decomposition', header=1)
+
+plt.plot(data['Temperature.2'] + 273.15,
+         data['Conversion.2'],
+         'o',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C0',
+         label='Al$_{2}$O$_{3}$')
+plt.errorbar(data['Temperature.1'] + 273.15,
+             data['Conversion.1'],
+             data['Error.1'],
+             capthick=1.5, c='C1',
+             fmt=None,
+             label=None)
+
+plt.plot(data['Temperature.1'] + 273.15,
+         data['Conversion.1'],
+         '^', ms=6, mew=1.5,
+         mfc='w',
+         c='C1',
+         label='Ni/Al$_{2}$O$_{3}$')
+
+plt.errorbar(data['Temperature'] + 273.15,
+             data['Conversion'],
+             data['Error'],
+             fmt=None,
+             c='C2',
+             capthick=1.5,
+             label=None)
+
+plt.plot(data['Temperature'] + 273.15,
+         data['Conversion'],
+         's',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C2',
+         label='Pt/Al$_{2}$O$_{3}$')
+
+plt.xlim(400, 1173)
+plt.ylim(-5, 105)
+plt.legend(frameon=False, fontsize=8)
+plt.xlabel('Temperature (K)', fontsize=10)
+plt.xticks(fontsize=10)
+plt.yticks(fontsize=10)
+plt.ylabel('NH$_{3}$ Conversion (%)', fontsize=10)
+
+ax1 = plt.subplot(211, sharex=ax2)
+
+data = pd.read_excel('high-T-expts.xlsx', 'eqb-data', header=0)
+plt.plot(data['T(K)'], data['X'] * 100, 'k--', label='Eqb. limit')
+
+data = pd.read_excel('high-T-expts.xlsx', 'metal-sweep', header=1)
+
+plt.errorbar(data['Temperature.2'] + 273.15,
+             data['Conversion.2'],
+             data['Conversion Error.2'],
+             capthick=1.5,
+             fmt=None,
+             label=None)
+plt.plot(data['Temperature.2'] + 273.15,
+         data['Conversion.2'],
+         'o',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C0',
+         label='Al$_{2}$O$_{3}$')
+
+plt.errorbar(data['Temperature.1'] + 273.15,
+             data['Conversion.1'],
+             data['Conversion Error.1'],
+             capthick=1.5,
+             fmt=None,
+             label=None)
+plt.plot(data['Temperature.1'] + 273.15,
+         data['Conversion.1'],
+         '^',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C1',
+         label='Ni/Al$_{2}$O$_{3}$')
+
+plt.errorbar(data['Temperature'] + 273.15,
+             data['Conversion'],
+             data['Conversion Error'],
+             fmt=None,
+             capthick=1.5,
+             label=None)
+plt.plot(data['Temperature'] + 273.15,
+         data['Conversion'],
+         's',
+         ms=6,
+         mew=1.5,
+         mfc='w',
+         c='C2',
+         label='Pt/Al$_{2}$O$_{3}$')
+
+plt.ylim(0, 2.5)
+plt.xlim(400, 1173)
+plt.yticks(fontsize=10)
+plt.setp(ax1.get_xticklabels(), visible=False)
+
+plt.ylabel('NH$_{3}$ Yield (%)', fontsize=10)
+plt.legend(frameon=False, fontsize=8)
+plt.tight_layout()
+
+plt.figtext(0.03, 0.96, 'a', fontsize=12, fontweight='bold')
+plt.figtext(0.03, 0.49, 'b', fontsize=12, fontweight='bold')
+
+
+for ext in ['eps', 'pdf', 'png']:
+    plt.savefig('figures/NH3-plasma-metal.{0}'.format(ext), dpi=200)
+
+plt.show()
+
+#+END_SRC
+
+#+RESULTS:
