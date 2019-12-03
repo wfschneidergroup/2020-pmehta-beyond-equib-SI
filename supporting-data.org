@@ -266,4 +266,120 @@ plt.show()
 
 ** Figure 3: Plasma-on \ce{NH3} yields
 
+#+BEGIN_SRC python
+from mkmutils import *
+import matplotlib.pyplot as plt
+from mkmutils import mkmRunner as runner
+
+plt.style.use('seaborn-paper')
+plt.rcParams["font.family"] = "Helvetica"
+
+# Barrier reduced by,
+Evib_A2 = 1.0
+
+plt.figure(figsize=(3, 4), dpi=200)
+
+grid = plt.GridSpec(3, 1, hspace=0)
+ax1 = plt.subplot(grid[0, 0])
+ax2 = plt.subplot(grid[1, 0], sharex=ax1)
+ax3 = plt.subplot(grid[2, 0], sharex=ax1)
+
+axes = [ax1, ax2, ax3]
+
+EAs = [-1.2, -0.6, 0.0]
+kei = range(-15, -12, 1)
+ks_eimpact=[float('1.0e{0}'.format(i)) for i in kei]  # cm3 / s
+
+plasma_on = True
+rxn2_barrier = True
+
+for ax, EA in zip(axes, EAs):
+
+    for c, k_eimpact in zip(['tan', 'palevioletred', 'seagreen'], ks_eimpact):
+	mod = runner(EA,
+                     plasma_on=plasma_on,
+                     k_eimpact_A2=k_eimpact,
+                     rxn2_barrier=rxn2_barrier,
+                     excite_type='vib',
+                     Evib_A2=Evib_A2)
+
+	prefix = mod.prefix
+	try:
+	    d = load_variables('mkm-calcs/{0}/{0}.mkmout'.format(prefix))
+
+	    if plasma_on:
+		inp = mod.input_params
+		kene = inp['k_eimpact_A2'] * inp['n_e']
+		allpressures = d['pressures']
+		pABs = []
+
+		for p in allpressures:
+		    pA2, pA2prime, pB, pAB, pABprime = p
+		    pABs.append(np.float(pAB))
+
+                label = '$k_{{e}} n_{{e}} = 10^{{{0:1.0f}}}$ s$^{{-1}}$'.format(np.log10(kene)))
+		line, = ax.plot(d['T'],
+                                pABs,
+                                '-',
+                                c=c,
+				label=label)
+
+	except Exception as E:
+	    print prefix, E
+
+    modoff = runner(EA,
+                    plasma_on=False,
+		    rxn2_barrier=rxn2_barrier)
+
+    prefix = modoff.prefix
+    doff = load_variables('mkm-calcs/{0}/{0}.mkmout'.format(prefix))
+
+    allpressures = doff['pressures']
+    pABsoff = []
+
+    for p in allpressures:
+	pA2, pB, pAB = p
+	pABsoff.append(np.float(pAB))
+
+    pABsoff2plot = [pAB for i, pAB in enumerate(pABsoff) if i % 4. == 0]
+    T2plot = [T for i, T in enumerate(doff['T']) if i % 4. == 0]
+
+    ax.plot(T2plot, pABsoff2plot, 'o', ms=4, mew=1, mfc='None', mec='C5', label='plasma off')
+
+    pABeq = [float(x[-1]) for x in d['eq_pressures']]
+
+    ax.plot(d['T'], pABeq, c='k', ls='--', label='Eqb. limit')
+
+    ax.set_ylim(-0.01, 0.3)
+    ax.set_yticks([0.0, 0.1, 0.2])
+    ax.set_yticklabels([0.0, 0.1, 0.2], fontsize=7.5)
+    ax.set_ylabel('NH$_{3}$ pressure (atm)', fontsize=7.5)
+
+ax1, ax2, ax3 = axes
+
+ax1.legend(fontsize=6, frameon=False, ncol=2, columnspacing=1, handlelength=1.5)
+
+plt.setp(ax1.get_xticklabels(), visible=False)
+plt.setp(ax2.get_xticklabels(), visible=False)
+
+ax3.set_xlim(350, 950)
+ax3.set_xlabel('Temperature (K)', fontsize=7.5)
+
+plt.figtext(0.22, 0.93, 'a', fontsize=8, fontweight='bold')
+plt.figtext(0.22, 0.65, 'b', fontsize=8, fontweight='bold')
+plt.figtext(0.22, 0.37, 'c', fontsize=8, fontweight='bold')
+
+plt.figtext(0.7, 0.75, '$E_{N} = -1.2$ eV', fontsize=7.5)
+plt.figtext(0.7, 0.5, '$E_{N} = -0.6$ eV', fontsize=7.5)
+plt.figtext(0.74, 0.32, '$E_{N} = 0.0$ eV', fontsize=7.5)
+
+plt.tight_layout()
+for ext in ['eps', 'png', 'pdf']:
+      plt.savefig('figures/plasma-on-NH3-syn.{0}'.format(ext), dpi=200)
+
+plt.show()
+#+END_SRC
+
+#+RESULTS:
+
 
