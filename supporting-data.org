@@ -102,8 +102,11 @@ from mkmutils import mkmRunner as runner
 
 EAs = [-1.2, -0.6, 0.0]
 
-kei = range(-15, -5, 1)
+kei = range(-15, -12, 1)
 ks_eimpact=[float('1.0e{0}'.format(i)) for i in kei]  # cm3 / s
+
+# Excitation energy, eV
+Evib_A2 = 1.0
 
 for EA in EAs:
     for k_eimpact in ks_eimpact:
@@ -119,6 +122,10 @@ for EA in EAs:
 	        mod.write_input(ncores=2)
 	        mod.run_job()
  #+END_SRC
+
+ #+RESULTS:
+ :results:
+ :end:
 
 
 ** Figure 2: Plasma-off \ce{NH3} yields
