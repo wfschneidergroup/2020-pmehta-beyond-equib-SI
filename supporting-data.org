@@ -119,4 +119,151 @@ for EA in EAs:
 
 ** Figure 2
 
+ #+BEGIN_SRC python :results output org drawer
+from simplemkm import simpleMkm as mkm
+import numpy as np
+from plasmautils import make_PES
+import matplotlib.pyplot as plt
+from mkmutils import *
+
+plt.style.use('seaborn-paper')
+plt.rcParams["font.family"] = "Helvetica"
+
+fig = plt.figure(figsize = (3.5, 3.25), dpi=200)
+
+rates = []
+
+EAmetal = [-1.2, -0.6, 0.0]
+
+
+for EA in EAmetal:
+    mod = mkmRunner(EA, plasma_on=False, rxn2_barrier=True)
+    prefix = mod.prefix
+    d = load_variables('mkmRunner-ammonia-syn-Grabow/{0}/{0}.mkmout'.format(prefix))
+
+    Xs = [float(X) for X in d['X']]
+    #plt.plot(d['T'], Xs, '-',
+    #         label='$E_{{\mathrm{{A}}}}$ = {0} eV'.format(EA))
+
+    allpressures = d['pressures']
+    pABs = []
+    
+    for p in allpressures:
+        pA2, pB, pAB = p
+        pABs.append(np.float(pAB))
+
+    plt.plot(d['T'], pABs, '-',
+             label='$E_{{\mathrm{{N}}}} = {0}$ eV'.format(EA))
+
+Xeq = [float(x) for x in d['Xeq']]
+pABeq = [float(x[-1]) for x in d['eq_pressures']]
+
+plt.plot(d['T'], pABeq, c='k', ls='--', label='Eqb. limit')
+
+plt.ylim(-0.001, 0.1)
+plt.xlim(350, 1000)
+plt.legend(frameon=False, fontsize=8)
+plt.xlabel('Temperature (K)')
+plt.ylabel('NH$_{3}$ pressure (atm)')
+
+ax2 = fig.add_axes([0.65, 0.4, 0.25, 0.25])
+
+EAs = np.linspace(1., -1.5, 150)
+T = 473.
+
+theta = 0.0
+
+X = 0.05 # , 0.02, 0.08, 0.8]
+
+# grid = plt.GridSpec(2, 2)
+
+
+rates = []
+for i, EA in enumerate(EAs):
+    mod = mkm(T, EA, rxn2_barrier=True)
+
+    kf, kr = mod.get_rate_constants()
+    K2 = kf[1] / kr[1]
+    pA2, pB, pAB = mod.get_pressures(X)
+
+    theta = mod.integrate_odes(theta0=theta, X=X)[0]
+        
+    try:
+	theta = mod.find_steady_state_roots(theta0=[theta], X=X)
+    except:
+        theta = mod.integrate_odes(theta0=theta, X=X)[0]
+        try:
+            theta = mod.find_steady_state_roots(theta0=[theta], X=X)
+        except:
+            pass
+                         
+    r = mod.get_rates(theta, mod.get_pressures(X))
+
+    if r[0] > 0:
+        ls = '-'
+    else:
+        ls = '--'
+
+    rates.append(abs(r[0]))
+ax2.plot(EAs,
+         np.log10(rates),
+         ls,
+         label='$p_{{\mathrm{{AB}}}} = {0:1.3f}$ atm'.format(pAB), c='C7')
+
+print pA2, pB, pAB
+
+# EAmetal = [-1.2, -0.9, -0.6, -0.3, 0.0, 0.3, 0.6, 0.8]
+#EAmetal = [-1.27, -0.46, -0.34, -0.18, -0.06, 0.61, 0.91]
+
+EAmetal = [-1.2, -0.6, 0.0]
+
+for EA in EAmetal:
+    mod = mkm(T, EA, rxn2_barrier=True)
+
+    kf, kr = mod.get_rate_constants()
+    K2 = kf[1] / kr[1]
+    pA2, pB, pAB = mod.get_pressures(X)
+
+    theta = mod.integrate_odes(theta0=theta, X=X)[0]
+        
+    try:
+	theta = mod.find_steady_state_roots(theta0=[theta], X=X)
+    except:
+        theta = mod.integrate_odes(theta0=theta, X=X)[0]
+        try:
+            theta = mod.find_steady_state_roots(theta0=[theta], X=X)
+        except:
+            pass
+                         
+    r = mod.get_rates(theta, mod.get_pressures(X))
+
+    if r[0] > 0:
+        ls = '-'
+    else:
+        ls = '--'
+
+    ax2.plot(EA, np.log10(abs(r[0])), 'o')
+
+
+# plt.legend(fontsize=6, frameon=False)
+# plt.legend(fontsize=8, frameon=False, handlelength=1.5, columnspacing=0.5, ncol=2)
+plt.ylim(-16, -4)
+plt.xlim(-1.5, 0.5)
+
+# plt.xticks(fontsize=7)
+plt.yticks(np.arange(-15, 0, 5))
+
+plt.xlabel('$E_{\mathrm{N}}$ (eV)')
+plt.ylabel('log$_{10}$(TOF [s$^{-1}$])')
+
+
+
+plt.tight_layout()
+
+for ext in ['eps', 'pdf', 'png']:
+    plt.savefig('paper-figures/thermal-pNH3.{0}'.format(ext), dpi=200)
+plt.show()
+ #+END_SRC
+
+
 ** Figure 3
