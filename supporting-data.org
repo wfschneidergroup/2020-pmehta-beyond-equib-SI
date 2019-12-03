@@ -89,6 +89,10 @@ for EA in EAs:
 	mod.run_job()
 #+END_SRC
 
+#+RESULTS:
+:results:
+:end:
+
 
 ** Using the kinetic model: Plasma-on calculations
 
