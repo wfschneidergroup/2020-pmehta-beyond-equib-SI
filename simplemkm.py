@@ -13,6 +13,13 @@ Na = 6.022140e23  # 1 / mol
 
 
 class simpleMkm:
+    """
+    Class to run a simple microkinetic model for,
+    A2 + B <-> 2AB
+    Parametrized for ammonia synthesis with
+    A = N, and B = 3/2 H2
+    Elementary rate equations described in main text    
+    """
 
     def __init__(self,
                  T,
@@ -34,8 +41,8 @@ class simpleMkm:
                  k_eimpact_AB=0.0,  # cm3 / s. For AB activation
                  n_e=1e12,  # electron number density, 1/cm3
                  rxn2_barrier=False,  # Add a barrier for A* + B <--> AB?
-                 excite_type='diss',
-                 Evib_A2=0.3,
+                 excite_type='diss', # diss / vib (no / reduced barrier for excited state)
+                 Evib_A2=0.3, # Barrier reduced by
                  Evib_AB=0.3,
                  p0=1.0,
                  reverse=False,
@@ -353,7 +360,9 @@ class simpleMkm:
         return kf_conc, kr_conc
 
     def get_rates(self, theta, Ps):
-
+        """
+        Uses rate constants in 1 / s
+        """
         if not self.plasma_on:
             # if not self.concentration_based:
                 kf = self.kf
@@ -373,6 +382,10 @@ class simpleMkm:
         return rate
 
     def get_rates_conc(self, Cs, rate_type='net'):
+        """
+        Uses rate constants in concentration based units
+        """
+        
         kf = self.kf_conc
         kr = self.kr_conc
 
@@ -427,6 +440,9 @@ class simpleMkm:
 
     @staticmethod
     def get_odes(theta, t, X, self):
+        """
+        ODEs for site-based model
+        """
         if not self.plasma_on:
             if self.model == 'site':
 
@@ -438,7 +454,9 @@ class simpleMkm:
 
     @staticmethod
     def get_odes_CSTR(Concs, t, self):
-
+        """
+        ODEs for CSTR model
+        """
         if self.model == 'reactor':
             T = self.T
             V = self.V

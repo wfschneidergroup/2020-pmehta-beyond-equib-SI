@@ -72,7 +72,6 @@ def make_PES(Hs,
         if legend:
             plt.legend(fontsize=fontsize)
         return line
-    # plt.title('Potential Energy Surface')
     plt.xticks([])
     plt.yticks(fontsize=fontsize)
 
@@ -134,7 +133,10 @@ runner.run()
 
 
 class mkmRunner:
-
+    """
+    Utility class for running microkinetic model calculations
+    using simpleMkm
+    """
     def __init__(self,
                  EA,
                  **kwargs):
@@ -249,7 +251,9 @@ class mkmRunner:
                                             q))
 
     def run_job(self):
-
+        """
+        Submit job to queue
+        """
         from subprocess import Popen, PIPE
         qscript = self.qscript
         p = Popen(['qsub', qscript], stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -267,6 +271,10 @@ class mkmRunner:
         return jobid
 
     def run(self):
+        """
+        Run temperature sweep model
+        """
+        
         from simplemkm import simpleMkm as mkm
 
         inp = self.input_params
