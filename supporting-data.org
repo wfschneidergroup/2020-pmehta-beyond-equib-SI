@@ -62,7 +62,7 @@
 
 * Supplementary Data
 
-Source code and raw data is provided in an external Zenodo repository at *link.* The python class =simpleMkm= in /simplemkm.py/ contains the core functions necessary to perform the microkinetic calculations, while the class =mkmRunner= in mkmutils.py contains utility functions to run the calculations in an automated fashion on our computing cluster. The input (/*.mkminp/) and output (/*.mkmout/) files for the microkinetic model are included in the Zenodo directory. Raw experimental data is also provided as an Excel spreadsheet (/high-T-expts.xlsx/). Example python scripts to perform the calculations in this work, and to create the figures in the main text are provided below. These scripts were executed within an Emacs org-mode document (/supporting-data.org/), which was then exported to create this supplementary data pdf file. 
+Source code and raw data is provided in an external Zenodo repository cite:prateek_mehta_2019_3566834. The python class =simpleMkm= in /simplemkm.py/ contains the core functions necessary to perform the microkinetic calculations, while the class =mkmRunner= in mkmutils.py contains utility functions to run the calculations in an automated fashion on our computing cluster. The input (/*.mkminp/) and output (/*.mkmout/) files for the microkinetic model are included in the Zenodo directory. Raw experimental data is also provided as an Excel spreadsheet (/high-T-expts.xlsx/). Example python scripts to perform the calculations in this work, and to create the figures in the main text are provided below. These scripts were executed within an Emacs org-mode document (/supporting-data.org/), which was then exported to create this supplementary data pdf file. 
 
 ** Using the kinetic model: Plasma-off calculations
 
@@ -600,3 +600,7 @@ plt.show()
 #+END_SRC
 
 #+RESULTS:
+
+
+[[bibliographystyle:naturemag]]
+[[bibliography:./references.bib]]
